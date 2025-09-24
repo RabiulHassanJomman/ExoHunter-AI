@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ExoHunter AI — A World Away: Hunting for Exoplanets with AI</title>
+    <meta name="description" content="NASA Space Apps 2025 project: AI/ML model analyzing Kepler/TESS light curves to detect exoplanets. Interactive demo, charts, and 3D visuals." />
+    <meta name="keywords" content="Exoplanets, AI, Machine Learning, NASA, Kepler, TESS, Light Curves, Space Apps" />
+    <meta name="theme-color" content="#0A0A2A" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              orbitron: ['Orbitron', 'sans-serif'],
+              roboto: ['Roboto', 'sans-serif'],
+            },
+            colors: {
+              space: '#0A0A2A',
+              neon: '#00BFFF',
+              indigo: '#4B0082',
+            },
+            boxShadow: {
+              neon: '0 0 10px #00BFFF',
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- AOS (Animate On Scroll) -->
+    <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet" />
+
+    <!-- Global styles -->
+    <style>
+      :root { color-scheme: dark; }
+      html, body, #root { height: 100%; background-color: #000; }
+      body { font-family: 'Roboto', sans-serif; color: #D3D3D3; }
+      .font-orbitron { font-family: 'Orbitron', sans-serif; }
+      .font-roboto { font-family: 'Roboto', sans-serif; }
+      .glow { box-shadow: 0 0 10px #00BFFF; }
+      .gradient-cta { background: linear-gradient(90deg, #4B0082, #00BFFF); }
+      .gradient-text { background: linear-gradient(90deg, #4B0082, #00BFFF); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .skip-link { position: absolute; left: -999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+      .skip-link:focus { position: static; width: auto; height: auto; padding: 0.5rem 1rem; background: #111827; color: #fff; z-index: 10000; }
+      .sr-only-focusable:focus { position: static; width: auto; height: auto; overflow: visible; }
+      .backdrop-blur-md { backdrop-filter: blur(12px); }
+      .neon-border { box-shadow: inset 0 0 10px rgba(0,191,255,0.5), 0 0 10px rgba(0,191,255,0.5); }
+      .neon-hover:hover { box-shadow: 0 0 15px #00BFFF; }
+      .space-bg { background: radial-gradient(ellipse at bottom, #0A0A2A 0%, #000 60%); }
+      .hero-bg-fallback { background-image: url('https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=1920&auto=format&fit=crop'); background-size: cover; background-position: center; }
+      .spinner { border: 4px solid rgba(255,255,255,0.1); border-left-color: #00BFFF; border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      canvas.three-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+      #particles-js { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+    </style>
+  </head>
+  <body class="space-bg">
+    <a class="skip-link" href="#main">Skip to Content</a>
+    <div id="particles-js" aria-hidden="true"></div>
+    <div id="root"></div>
+
+    <noscript>
+      <div style="padding:16px; text-align:center;">This site works best with JavaScript enabled. Please enable JavaScript to experience interactive charts and 3D visuals.</div>
+    </noscript>
+
+    <!-- External Libraries -->
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+
+    <!-- Particles.js default config -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        if (window.particlesJS) {
+          particlesJS('particles-js', {
+            particles: {
+              number: { value: 120, density: { enable: true, value_area: 800 } },
+              color: { value: '#ffffff' },
+              shape: { type: 'circle' },
+              opacity: { value: 0.4, random: false },
+              size: { value: 2, random: true },
+              line_linked: { enable: false },
+              move: { enable: true, speed: 0.6, direction: 'none', out_mode: 'out' }
+            },
+            interactivity: {
+              detect_on: 'canvas',
+              events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' } },
+              modes: { repulse: { distance: 80 }, push: { particles_nb: 2 } }
+            },
+            retina_detect: true
+          });
+        }
+        if (window.AOS) {
+          AOS.init({ once: true, duration: 800, easing: 'ease-out-cubic' });
+        }
+      });
+    </script>
+  </body>
+  </html>
+

@@ -1,0 +1,14 @@
+/* Additional global styles and utilities */
+* { -webkit-tap-highlight-color: transparent; }
+::selection { background: rgba(0,191,255,0.35); }
+/* Focus outline for accessibility */
+:focus-visible { outline: 2px solid #00BFFF; outline-offset: 2px; }
+
+/* Smooth scrolling for anchor navigation and offset for fixed header */
+html { scroll-behavior: smooth; }
+section { scroll-margin-top: 88px; }
+
+/* Fade-in utility if needed beyond AOS */
+.fade-in { animation: fadeIn 1s ease-out both; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
