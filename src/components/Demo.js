@@ -1,15 +1,62 @@
 /* global Plotly, Chart, THREE */
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { sampleLightCurve, sampleLightCurve2 } from '../utils/mockData';
 
+// Available sample light curve datasets for demonstration
 const samples = [sampleLightCurve, sampleLightCurve2];
 
+/**
+ * Mock ML Analysis Function
+ * Simulates a machine learning model that classifies exoplanet signals
+ * 
+ * @param {Object} data - Light curve data with time and flux arrays
+ * @returns {Promise} - Resolves with classification result after simulated processing time
+ * 
+ * Classification Logic:
+ * - Strong transit signals (deep dips) → confirmed exoplanet or candidate
+ * - Moderate signals → candidate or false positive
+ * - Weak signals → likely false positive
+ */
 function mockAnalyze(data) {
-  // Simple mock: increase probability if a dip exists
-  const minFlux = Math.min(...data.flux);
-  const detected = minFlux < 0.97;
-  const probability = detected ? 0.82 + Math.random() * 0.1 : 0.15 + Math.random() * 0.2;
-  return new Promise((resolve) => setTimeout(() => resolve({ detected, probability: Math.min(0.99, probability) }), 1200));
+  // Extract basic statistical features from light curve
+  const minFlux = Math.min(...data.flux);  // Minimum flux (deepest transit)
+  const maxFlux = Math.max(...data.flux);  // Maximum flux 
+  const fluxVariation = maxFlux - minFlux; // Total flux variation range
+  
+  let classification, confidence;
+  
+  // Classification decision tree based on transit depth and variation
+  if (minFlux < 0.96 && fluxVariation > 0.06) {
+    // Strong transit signal detected - likely a real exoplanet
+    classification = Math.random() > 0.2 ? 'confirmed' : 'candidate';
+    confidence = 0.85 + Math.random() * 0.14; // High confidence (85-99%)
+  } else if (minFlux < 0.98 && fluxVariation > 0.03) {
+    // Moderate signal - could be planet or instrumental noise
+    const rand = Math.random();
+    if (rand > 0.6) classification = 'candidate';
+    else if (rand > 0.3) classification = 'false_positive';
+    else classification = 'confirmed';
+    confidence = 0.60 + Math.random() * 0.25; // Medium confidence (60-85%)
+  } else {
+    // Weak or no signal detected - likely noise or stellar activity
+    classification = Math.random() > 0.1 ? 'false_positive' : 'candidate';
+    confidence = 0.75 + Math.random() * 0.20; // Variable confidence (75-95%)
+  }
+  
+  // Generate estimated physical parameters for real planet detections
+  const period = classification !== 'false_positive' ? 
+    (15 + Math.random() * 200).toFixed(1) : null; // Orbital period in days
+  const radius = classification !== 'false_positive' ? 
+    (0.5 + Math.random() * 3).toFixed(2) : null;  // Planet radius in Earth radii
+  
+  return new Promise((resolve) => 
+    setTimeout(() => resolve({ 
+      classification, 
+      confidence: Math.min(0.99, confidence),
+      period: period ? parseFloat(period) : null,
+      radius: radius ? parseFloat(radius) : null
+    }), 1200)
+  );
 }
 
 export default function Demo() {
@@ -101,21 +148,24 @@ export default function Demo() {
   }, []);
 
   useEffect(() => {
-    // Probability progress bar as Chart.js horizontal bar (using a doughnut as progress)
+    // Confidence progress bar as Chart.js doughnut chart
     if (!chartRef.current || !window.Chart || !result) return;
     const ctx = chartRef.current.getContext('2d');
-    const percent = Math.round(result.probability * 100);
+    const percent = Math.round(result.confidence * 100);
+    const color = result.classification === 'confirmed' ? '#10B981' :
+                  result.classification === 'candidate' ? '#F59E0B' : '#EF4444';
+    
     const chart = new window.Chart(ctx, {
       type: 'doughnut',
       data: {
-        labels: ['Probability', 'Remaining'],
+        labels: ['Confidence', 'Remaining'],
         datasets: [
-          { data: [percent, 100 - percent], backgroundColor: ['#00BFFF', 'rgba(255,255,255,0.1)'], borderWidth: 0 },
+          { data: [percent, 100 - percent], backgroundColor: [color, 'rgba(255,255,255,0.1)'], borderWidth: 0 },
         ],
       },
       options: {
         responsive: true,
-        cutout: '75%',
+        cutout: '70%',
         plugins: { legend: { display: false }, tooltip: { enabled: false } },
       },
     });
@@ -196,19 +246,56 @@ export default function Demo() {
 
               {result && (
                 <div className="mt-8" data-aos="fade-in">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className={`w-3 h-3 rounded-full ${result.detected ? 'bg-green-400' : 'bg-red-400'}`}></div>
-                    <div className="text-white font-semibold">{result.detected ? 'Exoplanet Detected!' : 'No Detection'}</div>
-                  </div>
-                  <div className="flex items-center gap-6">
-                    <div className="relative w-40 h-40">
-                      <canvas ref={chartRef} width="160" height="160" aria-label="Probability chart" role="img"></canvas>
-                      <div className="absolute inset-0 flex items-center justify-center text-xl font-semibold">
-                        {Math.round(result.probability * 100)}%
+                  <div className="bg-black/40 rounded-lg border border-white/10 p-4 mb-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`w-4 h-4 rounded-full ${
+                        result.classification === 'confirmed' ? 'bg-green-400' :
+                        result.classification === 'candidate' ? 'bg-yellow-400' : 'bg-red-400'
+                      }`}></div>
+                      <div className="text-white font-semibold text-lg">
+                        {result.classification === 'confirmed' ? 'Confirmed Exoplanet' :
+                         result.classification === 'candidate' ? 'Planetary Candidate' : 'False Positive'}
                       </div>
                     </div>
-                    <div className="text-gray-300">
-                      The model estimates a probability of detection based on transit-like dips in the light curve.
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="relative w-24 h-24">
+                          <canvas ref={chartRef} width="96" height="96" aria-label="Confidence chart" role="img"></canvas>
+                          <div className="absolute inset-0 flex items-center justify-center text-sm font-semibold">
+                            {Math.round(result.confidence * 100)}%
+                          </div>
+                        </div>
+                        <div className="text-gray-300 text-sm">
+                          Model Confidence
+                        </div>
+                      </div>
+                      
+                      {result.classification !== 'false_positive' && (
+                        <div className="space-y-2 text-sm">
+                          <div className="text-gray-300">
+                            <span className="text-white font-medium">Estimated Properties:</span>
+                          </div>
+                          {result.period && (
+                            <div className="text-gray-300">
+                              Orbital Period: <span className="text-cyan-400">{result.period} days</span>
+                            </div>
+                          )}
+                          {result.radius && (
+                            <div className="text-gray-300">
+                              Planet Radius: <span className="text-cyan-400">{result.radius} R⊕</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="mt-3 text-xs text-gray-400">
+                      {result.classification === 'confirmed' ? 
+                        'High confidence detection with strong transit signature' :
+                       result.classification === 'candidate' ? 
+                        'Moderate confidence - requires additional validation' :
+                        'Signal likely caused by instrumental noise or stellar activity'}
                     </div>
                   </div>
                 </div>

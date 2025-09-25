@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const navItems = [
   { label: 'Home', href: '#home' },
-  { label: 'About Challenge', href: '#about' },
+  { label: 'About', href: '#about' },
   { label: 'How It Works', href: '#how-it-works' },
   { label: 'Demo', href: '#demo' },
   { label: 'Results', href: '#results' },
@@ -25,8 +25,7 @@ export default function Header() {
       role="banner" aria-label="Primary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <a href="#home" className="flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-neon" aria-label="ExoHunter AI Home">
-            <img src="https://via.placeholder.com/50?text=NASA" alt="NASA Space Apps logo" className="w-8 h-8 rounded" loading="lazy" />
+          <a href="#home" className="focus:outline-none focus-visible:ring-2 focus-visible:ring-neon" aria-label="ExoHunter AI Home">
             <span className="font-orbitron text-white text-xl tracking-wide">ExoHunter <span className="text-neon">AI</span></span>
           </a>
 
