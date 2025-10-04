@@ -1,5 +1,6 @@
 /* global Plotly, Chart, THREE */
 import { useEffect, useRef, useState } from 'react';
+import ReasoningPanel from './ReasoningPanel';
 import { sampleLightCurve, sampleLightCurve2 } from '../utils/mockData';
 
 // Available sample light curve datasets for demonstration
@@ -64,6 +65,7 @@ export default function Demo() {
   const [uploaded, setUploaded] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
+  const [showReasoning, setShowReasoning] = useState(false);
   const plotRef = useRef(null);
   const chartRef = useRef(null);
   const planetCanvasRef = useRef(null);
@@ -216,6 +218,7 @@ export default function Demo() {
       const data = uploaded || selected;
       const r = await mockAnalyze(data);
       setResult(r);
+      setShowReasoning(true);
     } catch (e) {
       alert('Analysis failed. Your browser may not support required features.');
     } finally {
@@ -298,6 +301,54 @@ export default function Demo() {
                         'Signal likely caused by instrumental noise or stellar activity'}
                     </div>
                   </div>
+
+                  {showReasoning && (
+                    <ReasoningPanel
+                      classification={result.classification}
+                      confidence={result.confidence}
+                      onClose={() => setShowReasoning(false)}
+                    >
+                      <p className="text-xs italic text-gray-400">
+                        This is purely AI-assisted reasoning. So you shouldn’t expect the reasoning as flawless.
+                      </p>
+
+                      <ol className="list-decimal pl-5 space-y-2">
+                        <li>
+                          <span className="font-semibold text-white">Ideal Planetary Parameters:</span> The fundamental characteristics of the transit signal are pristine.
+                          <ul className="list-disc pl-5 mt-2 space-y-1">
+                            <li>
+                              <span className="text-white">Planet Radius (koi_prad):</span> The derived radius is 1.16 Earth radii. This is a perfect size for a small, terrestrial "super-Earth" type planet and is a strong indicator of a planetary nature.
+                            </li>
+                            <li>
+                              <span className="text-white">Transit Depth (koi_depth):</span> The depth of 131.1 ppm is very shallow, consistent with a small planet transiting a Sun-like star. It is far too shallow to be caused by a stellar companion.
+                            </li>
+                            <li>
+                              <span className="text-white">Signal-to-Noise Ratio (koi_model_snr):</span> At 50.6, the signal is detected with extremely high confidence. There is no doubt that a real, periodic dimming event is occurring.
+                            </li>
+                            <li>
+                              <span className="text-white">Impact Parameter (koi_impact):</span> The value of 0.051 is very close to zero, indicating a central transit across the star’s disk. This typically produces a clean, flat-bottomed “U-shaped” light curve, which is a hallmark of a genuine planetary transit.
+                            </li>
+                          </ul>
+                        </li>
+
+                        <li>
+                          <span className="font-semibold text-white">Lack of Evidence for a False Positive:</span> The common causes for a false positive are typically a background eclipsing binary contaminating the target’s photometry or an issue with the transit shape itself. The data shows no evidence of either.
+                          <ul className="list-disc pl-5 mt-2 space-y-1">
+                            <li>
+                              <span className="text-white">Centroid Analysis:</span> Key tests for a BEB are the difference image centroiding metrics (koi_dicco_msky, koi_dicco_mdc, koi_dicco_msly). These measure whether the source of the dimming is located on the target star or on a nearby, unresolved star. None show significant offset.
+                            </li>
+                            <li>
+                              Neither of these measurements is statistically significant. A robust detection of a centroid offset typically requires a significance of ≥3-sigma. Therefore, these vetting statistics strongly suggest the transit signal is originating from the target star, which is what we expect for a true planet.
+                            </li>
+                          </ul>
+                        </li>
+                      </ol>
+
+                      <p className="text-sm text-gray-300 mt-4">
+                        However, based solely on the information provided, this object should be considered a high‑priority PLANETARY CANDIDATE. The available evidence does not support the given disposition.
+                      </p>
+                    </ReasoningPanel>
+                  )}
                 </div>
               )}
             </div>
